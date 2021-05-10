@@ -80,3 +80,84 @@ const followClusterBehavior = (
 
 export const FollowCluster = (ctx: CanvasRenderingContext2D, size) =>
   new Flock({ ctx, size, behavior: followClusterBehavior, initBoid });
+
+export interface BuildFlockProps {
+  ctx: CanvasRenderingContext2D;
+  baseSpeed: number;
+  randomSpeedMultiplier: number;
+  speedFluctuationMultiplier: number;
+  baseAffinity: number;
+  flockSize: number;
+}
+
+export const buildFlock = ({
+  ctx,
+  baseSpeed,
+  randomSpeedMultiplier,
+  speedFluctuationMultiplier,
+  baseAffinity,
+  flockSize,
+}: BuildFlockProps) => {
+  const followClusterBehavior = (
+    on: Boid<typeof extras>,
+    boids: Array<Boid<typeof extras>>,
+    { mouseX, mouseY }: { mouseX: number; mouseY: number },
+  ) => {
+    let closest;
+    let closestDistance = Infinity;
+    for (const boid of boids) {
+      if (boid === on) continue;
+      const distance = on.distanceTo(boid);
+      if (distance < closestDistance) {
+        closest = boid;
+        closestDistance = distance;
+      }
+    }
+
+    const targetAngleCloses = +on.angleTo(closest);
+
+    const smallestAngleClosest =
+      ((targetAngleCloses - on.angle + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+
+    on.angle += smallestAngleClosest / 10;
+
+    if (on.distanceToPoint(mouseX, mouseY) < 100) {
+      const targetAngleMouse = Math.PI + on.angleToPoint(mouseX, mouseY);
+
+      const smallestAngleMouse =
+        ((targetAngleMouse - on.angle + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+
+      on.angle +=
+        (smallestAngleMouse / on.distanceToPoint(mouseX, mouseY)) * 20;
+    }
+    on.extras.speed = Math.max(
+      1,
+      Math.abs(
+        (Math.random() - 0.5) * speedFluctuationMultiplier + on.extras.speed,
+      ),
+    );
+    on.forward(on.extras.speed);
+  };
+
+  const initBoid = (ctx: CanvasRenderingContext2D) => {
+    return new Boid(
+      ctx,
+      Math.random() * Boid.screenSize[0],
+      Math.random() * Boid.screenSize[1],
+      {
+        speed: Math.floor(Math.random() * randomSpeedMultiplier + baseSpeed),
+        affinity: Math.floor(Math.random() * 10 + baseAffinity),
+      },
+      `rgba(${Math.random() * 255},${Math.random() * 255},${
+        Math.random() * 255
+      },0.7)`,
+    );
+  };
+
+  return new Flock({
+    ctx,
+    size: flockSize,
+    behavior: followClusterBehavior,
+    initBoid,
+  });
+};
