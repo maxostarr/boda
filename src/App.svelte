@@ -1,10 +1,12 @@
 <script lang="ts">
   import { afterUpdate, onMount } from "svelte";
+  import Slider from "./components/Slider.svelte";
   import { FollowCluster } from "./lib/Example";
   import type { Flock } from "./lib/Flock";
   let canvas: HTMLCanvasElement;
   let width: number;
   let ctx: CanvasRenderingContext2D;
+  let flockSize: number = 10;
   let flock: Flock<
     {
       speed: number;
@@ -29,13 +31,15 @@
 
   onMount(() => {
     ctx = canvas.getContext("2d");
-    flock = FollowCluster(ctx);
+    flock = FollowCluster(ctx, flockSize);
     draw();
   });
 
   afterUpdate(() => {
     canvas.width = Math.min(width - 100, 500);
   });
+
+  $: flock = FollowCluster(ctx, flockSize);
 </script>
 
 <svelte:window bind:innerWidth={width} />
@@ -43,6 +47,8 @@
 <div class="container">
   <aside class="config">
     <h1>Config</h1>
+    <Slider label="Flock Size" bind:value={flockSize} />
+    {flockSize}
   </aside>
 
   <main>
@@ -64,7 +70,7 @@
 
   aside {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     text-align: center;
   }
 
@@ -94,12 +100,6 @@
   canvas {
     background-color: rgb(231, 225, 225);
   }
-
-  /* @media (min-width: 640px) {
-    main {
-      max-width: none;
-    }
-  } */
 
   @media (max-width: 1060px) {
     .container {

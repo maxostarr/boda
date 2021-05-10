@@ -78,5 +78,5 @@ const followClusterBehavior = (
   on.forward(on.extras.speed);
 };
 
-export const FollowCluster = (ctx: CanvasRenderingContext2D) =>
-  new Flock({ ctx, size: 300, behavior: followClusterBehavior, initBoid });
+export const FollowCluster = (ctx: CanvasRenderingContext2D, size) =>
+  new Flock({ ctx, size, behavior: followClusterBehavior, initBoid });
