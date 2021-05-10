@@ -47,7 +47,7 @@
 <div class="container">
   <aside class="config">
     <h1>Config</h1>
-    <Slider label="Flock Size" bind:value={flockSize} />
+    <Slider label="Flock Size" bind:value={flockSize} max={200} />
     {flockSize}
   </aside>
 
