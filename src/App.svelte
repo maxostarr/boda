@@ -1,7 +1,37 @@
 <script lang="ts">
-  import { afterUpdate } from "svelte";
-  let canvas;
-  let width;
+  import { afterUpdate, onMount } from "svelte";
+  import { FollowCluster } from "./lib/Example";
+  import type { Flock } from "./lib/Flock";
+  let canvas: HTMLCanvasElement;
+  let width: number;
+  let ctx: CanvasRenderingContext2D;
+  let flock: Flock<
+    {
+      speed: number;
+      affinity: number;
+    },
+    {
+      mouseX: 0;
+      mouseY: 0;
+    }
+  >;
+  const mousePos = {
+    mouseX: 0,
+    mouseY: 0,
+  } as const;
+
+  const draw = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    flock.update(mousePos);
+    flock.draw();
+    window.requestAnimationFrame(draw);
+  };
+
+  onMount(() => {
+    ctx = canvas.getContext("2d");
+    flock = FollowCluster(ctx);
+    draw();
+  });
 
   afterUpdate(() => {
     canvas.width = Math.min(width - 100, 500);
